@@ -1,0 +1,156 @@
+
+GeoExt.Lang.set("es");
+OpenLayers.ProxyHost="/pruebas/proxy/?url=";
+var app = new gxp.Viewer({
+    //proxy:"proxy/?url=",
+    portalConfig: {
+        layout: "border",
+        region: "center",
+        // by configuring items here, we don't need to configure portalItems
+        // and save a wrapping container
+        items: [{
+            id: "centerpanel",
+            xtype: "panel",
+            layout: "fit",
+            region: "center",
+            border: false,
+            items: ["mymap"]
+        }, {
+            id: "westcontainer",
+            xtype: "container",
+            layout: "vbox",
+            region: "west",
+            width: 200,
+            defaults: {
+                width: "100%",
+                layout: "fit"
+            },
+            items: [{
+                title: "Layers",
+                id: "westpanel",
+                border: false,
+                flex: 1
+            }, {
+                id: "legendpanel",
+                height: 250
+            }]
+        }],
+        bbar: {id: "mybbar"}
+    },
+    
+    // configuration of all tool plugins for this application
+    tools: [{
+        ptype: "gxp_layertree",
+        outputConfig: {
+            id: "tree",
+            border: true,
+            tbar: [] // we will add buttons to "tree.bbar" later
+        },
+        outputTarget: "westpanel",
+	groups: {
+		"default": "Overlays", // title can be overridden with overlayNodeText
+		"inv_vial":{
+			title:"Inventario Vial"
+		},
+	    	"background": {
+	        	title: "Base Layers", // can be overridden with baseNodeText
+	        	exclusive: true
+	    	}
+	}	
+    }, {
+        ptype: "gxp_addlayers",
+        actionTarget: "tree.tbar"
+    }, {
+        ptype: "gxp_removelayer",
+        actionTarget: ["tree.tbar", "tree.contextMenu"]
+    }, {
+        ptype: "gxp_zoomtoextent",
+        actionTarget: "map.tbar"
+    }, {
+        ptype: "gxp_zoom",
+        //showZoomBoxAction:true,
+        actionTarget: "map.tbar"
+    }, {
+        ptype: "gxp_navigationhistory",
+        actionTarget: "map.tbar"
+    }, {
+        ptype: "gxp_wmsgetfeatureinfo",
+        outputConfig: {width: 400},
+        actionTarget: {target: "map.tbar"},
+	format:"grid"
+    }, {
+        ptype: "gxp_legend",
+        outputTarget: "legendpanel"
+    }, {
+        ptype: "gxp_googlegeocoder",
+        outputTarget: "map.tbar",
+        outputConfig: {
+            emptyText: "Search for a location ..."
+        }
+    }, {
+        ptype: "gxp_zoomtolayerextent",
+        actionTarget: ["tree.contextMenu"]
+    },{
+ 	ptype:"gxp_measure",
+	actionTarget:{target:"map.tbar"}
+    }],
+    
+    // layer sources
+    sources: {
+        geoserver: {
+            ptype: "gxp_wmscsource",
+            url: "http://localhost:8080/geoserver/wms",
+            version: "1.1.1"
+        },
+
+        osm: {
+            ptype: "gxp_osmsource"
+        },
+        google: {
+            ptype: "gxp_googlesource"
+        }
+    },
+    // map and layers
+    map: {
+        id: "mymap", // id needed to reference map in portalConfig above
+        title: "Map",
+        projection: "EPSG:900913",
+        center: [-10764594.758211, 4523072.3184791],
+        zoom: 3,
+        layers: [{
+            source: "osm",
+            name: "mapnik",
+            group: "background"
+        }, {
+            source: "google",
+            name: "ROADMAP",
+            group: "background"
+        },{
+            source: "geoserver",
+            name: "pruebas:adherencia",
+            visibility:false,
+            selected: false,
+	    getFeatureInfo:{
+    		fields: ["twn_name","pop1990"],
+   		propertyNames: {"pop1990": "1990 Population",  "twn_name": "Town"}
+	    }
+	
+        },{
+            source: "geoserver",
+            name: "pruebas:alambrados",
+            visibility:false,
+            selected: false,
+	    group:"inv_vial",
+	    
+        }],
+        items: [{
+            xtype: "gx_zoomslider",
+            vertical: true,
+            height: 100
+        },{
+	   xtype:"gxp_scaleoverlay"	
+	}]
+    }
+
+});
+

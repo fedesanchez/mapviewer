@@ -1,0 +1,50 @@
+<?php
+
+
+if (!extension_loaded('PDO')) {
+	error_log("No se encuentra cargado el driver PDO. Cargandolo din�micamente");
+	@dl("php_pdo.".PHP_SHLIB_SUFFIX);
+	if (!extension_loaded('PDO'))
+		@dl("pdo.".PHP_SHLIB_SUFFIX);
+	if (!extension_loaded('PDO'))
+		throw new Exception("No se encuentra el driver PDO en el sistema",0);
+		
+	
+}
+
+if (!extension_loaded('PDO_PGSQL')) {
+	@dl("php_pdo_pgsql.".PHP_SHLIB_SUFFIX);
+	if (!extension_loaded('PDO_PGSQL'))
+		@dl("pdo_pgsql.".PHP_SHLIB_SUFFIX);
+	if (!extension_loaded('PDO_PGSQL'))
+		die("No se encuentra el driver PostgreSQL para PDO en el sistema");
+		
+}
+
+
+
+class Geoserver_DB extends PDO {
+	private $_user;
+	private $_pass;
+	private $_dsn;
+	
+	function __construct() { 
+		require_once("../includes/db.inc.php");
+		$this->_user = $config['dbuser'];
+		$this->_pass = $config['dbpass'];
+		$this->_dsn = $config['dbdsn'];
+		try {
+			parent::__construct($this->_dsn,$this->_user,$this->_pass);
+		}
+		catch (Exception $e) {
+			die($e->getMessage());
+		}
+		$this->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+		$schema = ($config['dbschema'])?$config['dbschema'].',':'';
+		$this->exec("SET search_path TO $schema public; SET client_encoding TO 'UTF8';");
+	}
+	
+}
+
+
+?>

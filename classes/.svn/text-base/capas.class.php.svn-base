@@ -1,0 +1,87 @@
+<?php
+class Capas {
+    protected $items = array();  
+
+    function __construct() {
+       
+        // ejecuto script, lo de cd es por el uso de source
+        exec("cd ../sh && ./listar_capas.sh", $output); 
+
+        $valores_unicos = array_unique($output);
+        //$valores_unicos = array_unique(&$output);   asi esta en produccion... problemas de version de php
+
+        
+        // Quitar caracteres raros y nombre:
+        $valores_a_borrar = array("nombre", ":", "'",'"');
+        $i=1;
+        foreach($valores_unicos as $key ){          
+         $limpio = str_replace($valores_a_borrar, "", $key);
+            
+            // Quito la coma final, no lo agregue en los valores a borrar porq puede haber mas de una coma
+
+            if (substr($limpio, -1, 1) == ',')
+            {
+              $limpio = substr($limpio, 0, -1);
+            }
+    
+            $valores_limpios[$i]=$limpio;
+            $i++;
+        }
+        
+        $this->items=$valores_limpios;
+        
+    }
+
+
+    function buscar($input){
+        $resultados = preg_grep('~' . $input . '~', $this->items);
+        $aux= array();
+        $i=1;
+        foreach($resultados as $val){
+            $aux[$i]=$val;
+            $i++;
+        }
+
+        $this->items= $aux;
+        
+    }
+
+    function get_cantCapas(){
+        return count($this->items);
+    }
+
+    function get_at($indice){
+        return $this->items[$indice];
+    }
+
+
+}
+
+class Indicador {
+    public $sTexto;
+    protected $indicadores = array();  
+
+    function __construct($sTexto) {
+         // ejecuto script, lo de cd es por el uso de source
+        exec("cd ../sh && ./buscar.sh $sTexto", $output); 
+
+        $valores_unicos = array_unique($output);
+        //$valores_unicos = array_unique(&$output);   asi esta en produccion... problemas de version de php
+        $this->indicadores=$valores_unicos;
+    }
+
+    function cant(){
+        return count($this->indicadores);
+    }
+
+    function get_at($indice){
+        return $this->indicadores[$indice];
+    }
+
+    function test(){
+        var_dump($this->indicadores);
+    }
+
+ }   
+
+?>

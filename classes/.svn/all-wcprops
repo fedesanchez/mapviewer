@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/admin_geoserver/!svn/ver/65/classes
+END
+estilos.class.php
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/admin_geoserver/!svn/ver/52/classes/estilos.class.php
+END
+backup.class.php
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/admin_geoserver/!svn/ver/16/classes/backup.class.php
+END
+db.class.php
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/admin_geoserver/!svn/ver/16/classes/db.class.php
+END
+capas.class.php
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/admin_geoserver/!svn/ver/65/classes/capas.class.php
+END

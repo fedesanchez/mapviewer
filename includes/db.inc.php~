@@ -1,0 +1,6 @@
+<?php
+$config['dbuser'] = "postgres";
+$config['dbpass'] = "postgres";
+$config['dbschema'] = "public";
+$config['dbdsn'] = "pgsql:host=localhost dbname=geoexplorer_php port=5432";
+?>

@@ -1,0 +1,34 @@
+<?php
+class Backup {
+	private $db;
+	
+	function __construct($db) { 
+		$this->db=$db;
+	}
+
+	function guardar($archivo,$original,$editado,$usuario){
+		
+		try{
+			$stmt = $this->db->prepare("INSERT INTO indicadores_editados(archivo,fecha_modificacion,modificado_por,contenido_original, contenido_editado) VALUES (?, now(), ?, ?, ?);");
+			$stmt->bindParam(1, $archivo);
+			$stmt->bindParam(3, $original);
+			$stmt->bindParam(4, $editado);
+			$stmt->bindParam(2, $usuario);		
+			return $stmt->execute();
+
+		}catch (Exception $e) {
+			return('Error: '.$e->getMessage());
+
+		}
+	}
+	
+	function testConexion(){
+		$stmt = $this->db->prepare("select * from indicadores_editados");
+		$stmt->execute();
+		echo $stmt->rowCount();
+	}
+
+
+}
+
+?>
