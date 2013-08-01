@@ -28,15 +28,16 @@
         <link rel="stylesheet" type="text/css" href="theme/app/style.css">
         <script type="text/javascript" src="src/override-ext-ajax.js"></script>
         <script type="text/javascript" src="src/lib.js"></script>
+        <script type="text/javascript" src="src/savemap.js"></script>
         <script type="text/javascript" src="<?php echo $map;?>"></script>
         <script>
             Ext.BLANK_IMAGE_URL = "theme/app/img/blank.gif";
             OpenLayers.ImgPath = "externals/openlayers/img/";
             GeoExt.Lang.set("es");
-            OpenLayers.ProxyHost="/pruebas/proxy/?url=";
+            OpenLayers.ProxyHost="proxy/?url=";
                 
             if(AppResponse.status==200){
-                var json=AppResponse.request[0];
+                var json=AppResponse.request;
                 json="{"+json+"}";
                 var map=Ext.util.JSON.decode(json);
                 var app = new gxp.Viewer(map);    

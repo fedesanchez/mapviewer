@@ -29,7 +29,7 @@
   		case 'PUT':
     		$maps->put($_POST);  
     		break;
-  		case 'POST':
+  		case 'POST':                
     		$maps->post($_POST);  
     		break;
   		case 'GET':

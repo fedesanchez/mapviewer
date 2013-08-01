@@ -21,7 +21,7 @@ class Maps {
     
     function initDB(){
 
-        $statement = "CREATE TABLE IF NOT EXISTS maps (id serial PRIMARY KEY, config text , description text);";        
+        $statement = "CREATE TABLE IF NOT EXISTS maps (id serial PRIMARY KEY, portalConfig text ,tools text,sources text, map text, description text);";        
         try {
             $sql = $this->connection->prepare($statement);          
             $sql->execute();    
@@ -35,7 +35,7 @@ class Maps {
 
     function getMapList($request) {    
         try {
-            $statement ="SELECT id,config,description FROM maps;";
+            $statement ="SELECT id,portalConfig,description FROM maps;";
             $sql = $this->connection->prepare($statement);
             $sql->execute();
             $results=$sql->fetchAll();
@@ -45,7 +45,7 @@ class Maps {
         $items = array();
         //$config;
         foreach($results as $key) {
-            //$config = JSON.parse(results.getString("config"));
+            //$config = JSON.parse(results.getString("portalConfig"));
             array_push($items,{
                 id: $key["id"], 
                 description:$key["description"]
@@ -83,8 +83,9 @@ class Maps {
         return $id;
     }
 
-    function getConfig($request) {
-        $config = $request["config"];
+    function getPortalConfig($request) {
+        $config = $request["portalconfig"];
+        error_log($config);
       /*  var obj;
         try {
         obj = JSON.parse(config);
@@ -99,7 +100,39 @@ class Maps {
         $config=str_replace("\t","", $config);
         $config=str_replace(PHP_EOL,"", $config);
         
-        return trim($config)    ;
+        error_log("antes de salir : $config");
+        return trim($config);
+    }
+
+    function getTools($request) {
+        $tools = $request["tools"];
+
+        $tools=str_replace(" ","", $tools);
+        $tools=str_replace("\t","", $tools);
+        $tools=str_replace(PHP_EOL,"", $tools);
+        
+        return trim($tools);
+    }
+
+    function getMapConfig($request) {
+        $map = $request["map"];
+
+        $map=str_replace(" ","", $map);
+        $map=str_replace("\t","", $map);
+        $map=str_replace(PHP_EOL,"", $map);
+        
+        return trim($map);
+    }
+
+
+    function getSources($request) {
+        $sources = $request["sources"];
+
+        $sources=str_replace(" ","", $sources);
+        $sources=str_replace("\t","", $sources);
+        $sources=str_replace(PHP_EOL,"", $sources);
+        
+        return trim($sources);
     }
 
     function getDescription($request) {
@@ -111,12 +144,12 @@ class Maps {
         if(!$status)$status=200;
         $response= array(
                         'status' => $status,
-                        'request' => array($data)
+                        'request' => $data
                         );
         
         $encoded = json_encode($response,true);
         header('Content-type: application/json');
-        exit("var AppResponse=$encoded");
+        exit($encoded);
 
     }
 
@@ -124,7 +157,7 @@ class Maps {
         $resp;
         $id = $this->getId($request);
         if ($id === null) {
-            // retrieve all map identifiers
+            // retrieve all map identifiers                    
             $resp = $this->createResponse($this->getMapList($request),200);
         } else if ($id === false) {
             // invalid id
@@ -142,14 +175,19 @@ class Maps {
             $id = $this->getId($request);
             if ($id !== null) {
                 $resp = $this->createResponse("Can't POST to map $id", 405);
-            } else {
-                $config = $this->getConfig($request);
+            } else {                                
+                $config = $this->getPortalConfig($request);
+                $sources= $this->getSources($request);
+                $tools= $this->getTools($request);
+                $map= $this->getMapConfig($request);
                 $description= $this->getDescription($request);
+                $data= array($config,$sources,$tools,$map,$description);
+
                 if (!$config) {
                     $resp = $this->createResponse("Bad map config.", 400);
                 } else {
                     // return the map id                    
-                    $resp = $this->createResponse($this->createMap($config, $description),200);
+                    $resp = $this->createResponse($this->createMap($data),200);
                 }
             }
         } else {
@@ -168,7 +206,7 @@ class Maps {
                 $resp = $this->createResponse("Invalid map id.", 400);
             } else {
                 // valid map id
-                $config = $this->getConfig($request);
+                $config = $this->getPortalConfig($request);
                 if (!$config) {
                     $resp = $this->createResponse("Bad map config.", 400);
                 } else {
@@ -202,26 +240,29 @@ class Maps {
     function readMap($id, $request) {
         $config;
         try {
-            $statement="SELECT config FROM maps WHERE id = $id;"; // todo: avoid sql injections
+            $statement="SELECT portalconfig,tools,sources,map FROM maps WHERE id = $id;"; // todo: avoid sql injections
             $sql = $this->connection->prepare($statement);
             $sql->execute();
             
             $results = $sql->fetchAll();
             if (count($results)==1) {
                 // found map by id              
-                $config = $this->getConfig($results[0]);
+                $config = $this->getPortalConfig($results[0]);
+                $sources= $this->getSources($results[0]);
+                $tools= $this->getTools($results[0]);
+                $map= $this->getMapConfig($results[0]);
              } else {
                 // not found
                 $this->createResponse("No map with id $id",404);
                 }
         
         } catch(Exception $e){
-            error_log("Error reading Map : $e");
+            $this->createResponse("Error reading map: ".$e->getMessage(),400);
         }
-    return $config;
+    return array($config,$tools,$sources,$map);
     }
 
-    function createMap($config, $description) {
+    function createMap($data) {
     //if (typeof config === "string") {
       //  config = JSON.parse(config);
     //}
@@ -233,9 +274,9 @@ class Maps {
     //var connection = SQLITE.open(getDb(request));
     try {
         // store the new map config
-        $statement="INSERT INTO maps (config,description) VALUES (?,?) RETURNING id;";
+        $statement="INSERT INTO maps (portalconfig,sources,tools,map,description) VALUES (?,?,?,?,?) RETURNING id;";
         $sql = $this->connection->prepare($statement);
-        $sql->execute(array($config,$description));
+        $sql->execute($data);
         $results = $sql->fetchAll();
         $id=$results[0]["id"];
         
