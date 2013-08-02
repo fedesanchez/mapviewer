@@ -29,76 +29,39 @@
         <script type="text/javascript" src="src/override-ext-ajax.js"></script>
         <script type="text/javascript" src="src/lib.js"></script>
         <script type="text/javascript" src="src/savemap.js"></script>
-        <script type="text/javascript" src="<?php echo $map;?>"></script>
+        
         <script>
             Ext.BLANK_IMAGE_URL = "theme/app/img/blank.gif";
             OpenLayers.ImgPath = "externals/openlayers/img/";
             GeoExt.Lang.set("es");
             OpenLayers.ProxyHost="proxy/?url=";
-                
+            var app;
+            Ext.Ajax.request({
+                    url: "<?php echo $map;?>",
+                    success: function(response) {                        
+                        var obj = Ext.util.JSON.decode(response.responseText);
+                        var data=obj[0].data;
+                        var config={};
+                        config.portalConfig=Ext.util.JSON.decode(data[0]).portalConfig;
+                        config.tools=Ext.util.JSON.decode(data[1]).tools;
+                        config.sources=Ext.util.JSON.decode(data[2]).sources;
+                        config.map=Ext.util.JSON.decode(data[3]).map;
+                                                                                                        
+                        app = new gxp.Viewer(config);
+                    },
+                    failure: function(response) {
+                        console.log('server-side failure with status code ' + response.status);
+                    }
+            });
+/*
             if(AppResponse.status==200){
                 var json=AppResponse.request;
                 json="{"+json+"}";
                 var map=Ext.util.JSON.decode(json);
                 var app = new gxp.Viewer(map);    
             }
-            
-            function test(){
-                var map=Ext.util.JSON.encode(app.map);
-                alert(map);
-            }
-
-            function save(callback, scope) {
-                var configStr = Ext.util.JSON.encode(app.map);
-                var method, url;
-                if (this.id) {
-                    method = "PUT";
-                    url = "../maps/" + this.id;
-                } else {
-                    method = "POST";
-                    url = "maps.php";
-                }
-                var requestConfig = {
-                    method: method,
-                    url: url,
-                    data: configStr
-                };
-                if (this.fireEvent("beforesave", requestConfig, callback) !== false) {
-                    OpenLayers.Request.issue(Ext.apply(requestConfig, {
-                        callback: function(request) {
-                            this.handleSave(request);
-                            if (callback) {
-                                callback.call(scope || this);
-                            }
-                        },
-                        scope: this
-                    }));
-                }
-            }
-        
-    /** private: method[handleSave]
-     *  :arg: ``XMLHttpRequest``
-     */
-    function handleSave(request) {
-        if (request.status == 200) {
-            var config = Ext.util.JSON.decode(request.responseText);
-            var mapId = config.id;
-            if (mapId) {
-                this.id = mapId;
-                var hash = "#maps/" + mapId;
-                if (this.fireEvent("beforehashchange", hash) !== false) {
-                    window.location.hash = hash;
-                }
-                this.fireEvent("save", this.id);
-            }
-        } else {
-            if (window.console) {
-                console.warn(this.saveErrorText + request.responseText);
-            }
-        }
-    }
-
-
+  */        
+ 
         </script>
     </head>
     <body></body>
