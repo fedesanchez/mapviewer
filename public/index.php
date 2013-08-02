@@ -10,7 +10,7 @@
         <link rel="stylesheet" type="text/css" href="src/ext/resources/css/xtheme-gray.css">
         <script type="text/javascript" src="src/ext/adapter/ext/ext-base.js"></script>
         <script type="text/javascript" src="src/ext/ext-all.js"></script>
-        <script type="text/javascript" src="maps.php"></script>
+        
         
         <!-- app resources -->
         <link rel="stylesheet" type="text/css" href="theme/app/style.css">
@@ -22,10 +22,10 @@
             // store configs
             autoDestroy: true,
             autoLoad:true,
-            data:AppResponse,
+            url:'maps.php',
             storeId: 'myStore',
             // reader configs
-            root: 'request',
+            //root: 'data',
             idProperty: 'id',
             fields: ['id', 'portalconfig', 'description']
           });

@@ -12,11 +12,15 @@ gxp.plugins.SaveMap = Ext.extend(gxp.plugins.Tool, {
         map: this.map,
         control: new OpenLayers.Control(),
         handler: function (){ 
-          
-                var portalconfig = Ext.util.JSON.encode(app.portalConfig);
-                var tools="to do";//Ext.util.JSON.encode(app.tools);
-                var sources=Ext.util.JSON.encode(app.sources);
-                var map=Ext.util.JSON.encode(app.map);
+                var center=app.mapPanel.map.getCenter();
+                var zoom=app.mapPanel.map.getZoom();
+                app.map.center=[center.lon,center.lat];
+                app.map.zoom=zoom;
+                
+                var portalconfig = "{ 'portalConfig':"+ Ext.util.JSON.encode(app.portalConfig) +"}";
+                var tools='';//Ext.util.JSON.encode(app.tools);
+                var sources="{ 'sources' :"+ Ext.util.JSON.encode(app.sources) + "}";
+                var map="{ 'map' :"+ Ext.util.JSON.encode(app.map) + "}";
                 var description="mi descripcion";
 
 
@@ -37,7 +41,7 @@ gxp.plugins.SaveMap = Ext.extend(gxp.plugins.Tool, {
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded"
                     },
-                    callback:handleSave                    
+                    callback:function(request){alert("save")}                    
                 };
               
                     OpenLayers.Request.issue(Ext.apply(requestConfig));                          
