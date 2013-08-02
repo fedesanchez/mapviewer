@@ -100,7 +100,7 @@ class Maps {
         $config=str_replace("\t","", $config);
         $config=str_replace(PHP_EOL,"", $config);
         
-        error_log("antes de salir : $config");
+        
         return trim($config);
     }
 
@@ -143,8 +143,10 @@ class Maps {
     function createResponse($data, $status) {
         if(!$status)$status=200;
         $response= array(
-                        'status' => $status,
-                        'request' => $data
+                          array(
+                                'status' => $status,
+                               'data' => $data
+                               )
                         );
         
         $encoded = json_encode($response,true);
@@ -178,10 +180,10 @@ class Maps {
             } else {                                
                 $config = $this->getPortalConfig($request);
                 $sources= $this->getSources($request);
-                $tools= $this->getTools($request);
+                //$tools= $this->getTools($request)==''? null: $this->getTools($request);
                 $map= $this->getMapConfig($request);
                 $description= $this->getDescription($request);
-                $data= array($config,$sources,$tools,$map,$description);
+                $data= array($config,$sources,$map,$description);
 
                 if (!$config) {
                     $resp = $this->createResponse("Bad map config.", 400);
@@ -273,8 +275,8 @@ class Maps {
     //config = JSON.stringify(config);
     //var connection = SQLITE.open(getDb(request));
     try {
-        // store the new map config
-        $statement="INSERT INTO maps (portalconfig,sources,tools,map,description) VALUES (?,?,?,?,?) RETURNING id;";
+        // store the new map config    
+        $statement="INSERT INTO maps (portalconfig,sources,map,description) VALUES (?,?,?,?) RETURNING id;";
         $sql = $this->connection->prepare($statement);
         $sql->execute($data);
         $results = $sql->fetchAll();
