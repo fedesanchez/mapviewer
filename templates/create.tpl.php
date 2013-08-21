@@ -28,6 +28,7 @@
         <link rel="stylesheet" type="text/css" href="theme/app/style.css">
         <script type="text/javascript" src="src/override-ext-ajax.js"></script>
         <script type="text/javascript" src="src/lib.js"></script>
+        <script type="text/javascript" src="src/tools.js"></script>
         <script type="text/javascript" src="src/savemap.js"></script>
         
         <script>
@@ -56,33 +57,7 @@
                     }],
                     bbar: {id: "mybbar"}
                 },
-                 tools: [{
-                    ptype: "gxp_layertree",
-                    outputConfig: {
-                        id: "tree",
-                        border: true,
-                        tbar: [] 
-                        },
-                        outputTarget: "westpanel"
-                    }, {
-                        ptype: "gxp_addlayers",
-                        actionTarget: "tree.tbar"
-                    }, {
-                        ptype: "gxp_removelayer",
-                        actionTarget: ["tree.tbar", "tree.contextMenu"]
-                    }, {
-                        ptype: "gxp_zoomtoextent",
-                        actionTarget: "map.tbar"
-                    }, {
-                        ptype: "gxp_zoom",
-                        actionTarget: "map.tbar"
-                    }, {
-                        ptype: "gxp_navigationhistory",
-                        actionTarget: "map.tbar"
-                    },{
-                        ptype:"gxp_savemap",
-                        actionTarget:"map.tbar"
-                    }],
+                tools:tools,                 
                 sources: {
                      mapa: {
                         ptype: "gxp_wmscsource",

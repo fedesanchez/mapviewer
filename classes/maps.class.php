@@ -83,36 +83,6 @@ class Maps {
         return $id;
     }
 
-    function getPortalConfig($request) {
-        $config = $request["portalconfig"];
-        error_log($config);
-      /*  var obj;
-        try {
-        obj = JSON.parse(config);
-        } catch (err) {
-            config = null;
-        }
-        if (typeof obj !== "object" || Array.isArray(obj)) {
-            config = null;
-        }
-        */
-        $config=str_replace(" ","", $config);
-        $config=str_replace("\t","", $config);
-        $config=str_replace(PHP_EOL,"", $config);
-        
-        
-        return trim($config);
-    }
-
-    function getTools($request) {
-        $tools = $request["tools"];
-
-        $tools=str_replace(" ","", $tools);
-        $tools=str_replace("\t","", $tools);
-        $tools=str_replace(PHP_EOL,"", $tools);
-        
-        return trim($tools);
-    }
 
     function getMapConfig($request) {
         $map = $request["map"];
@@ -125,15 +95,6 @@ class Maps {
     }
 
 
-    function getSources($request) {
-        $sources = $request["sources"];
-
-        $sources=str_replace(" ","", $sources);
-        $sources=str_replace("\t","", $sources);
-        $sources=str_replace(PHP_EOL,"", $sources);
-        
-        return trim($sources);
-    }
 
     function getDescription($request) {
         $description = $request["description"];     
@@ -177,15 +138,12 @@ class Maps {
             $id = $this->getId($request);
             if ($id !== null) {
                 $resp = $this->createResponse("Can't POST to map $id", 405);
-            } else {                                
-                $config = $this->getPortalConfig($request);
-                $sources= $this->getSources($request);
-                //$tools= $this->getTools($request)==''? null: $this->getTools($request);
+            } else {                                                            
                 $map= $this->getMapConfig($request);
                 $description= $this->getDescription($request);
-                $data= array($config,$sources,$map,$description);
+                $data= array($map,$description);
 
-                if (!$config) {
+                if (!$map) {
                     $resp = $this->createResponse("Bad map config.", 400);
                 } else {
                     // return the map id                    
@@ -208,7 +166,7 @@ class Maps {
                 $resp = $this->createResponse("Invalid map id.", 400);
             } else {
                 // valid map id
-                $config = $this->getPortalConfig($request);
+                $config = $this->getMapConfig($request);
                 if (!$config) {
                     $resp = $this->createResponse("Bad map config.", 400);
                 } else {
@@ -242,16 +200,16 @@ class Maps {
     function readMap($id, $request) {
         $config;
         try {
-            $statement="SELECT portalconfig,tools,sources,map FROM maps WHERE id = $id;"; // todo: avoid sql injections
+            $statement="SELECT map FROM maps WHERE id = $id;"; // todo: avoid sql injections
             $sql = $this->connection->prepare($statement);
             $sql->execute();
             
             $results = $sql->fetchAll();
             if (count($results)==1) {
                 // found map by id              
-                $config = $this->getPortalConfig($results[0]);
-                $sources= $this->getSources($results[0]);
-                $tools= $this->getTools($results[0]);
+                //$config = $this->getPortalConfig($results[0]);
+                //$sources= $this->getSources($results[0]);
+                //$tools= $this->getTools($results[0]);
                 $map= $this->getMapConfig($results[0]);
              } else {
                 // not found
@@ -261,22 +219,14 @@ class Maps {
         } catch(Exception $e){
             $this->createResponse("Error reading map: ".$e->getMessage(),400);
         }
-    return array($config,$tools,$sources,$map);
+    return array($map);
     }
 
     function createMap($data) {
-    //if (typeof config === "string") {
-      //  config = JSON.parse(config);
-    //}
-    // add creation & modified date
-    //var now = Date.now();
-    //config.created = now;
-    //config.modified = now;
-    //config = JSON.stringify(config);
-    //var connection = SQLITE.open(getDb(request));
+  
     try {
         // store the new map config    
-        $statement="INSERT INTO maps (portalconfig,sources,map,description) VALUES (?,?,?,?) RETURNING id;";
+        $statement="INSERT INTO maps (map, description, created, modified) VALUES (?,?,now(),null) RETURNING id;";
         $sql = $this->connection->prepare($statement);
         $sql->execute($data);
         $results = $sql->fetchAll();
@@ -307,22 +257,14 @@ class Maps {
         }             
     }
 
-    function updateMap($id, $config, $request) {
-       /*
-        if (typeof config === "string") {
-            config = JSON.parse(config);
-        }
-        // update modified date
-        config.modified = Date.now();
-        config = JSON.stringify(config);
-        */        
+    function updateMap($id, $config, $request) {       
         try {
-             $statement="UPDATE maps SET config = ? WHERE id = ? returning id;";
+             $statement="UPDATE maps SET map = ? ,modified=now() WHERE id = ? returning id;";
              $sql = $this->connection->prepare($statement);
              $sql->execute(array($config,$id));
              $results = $sql->fetchAll();
              $UpdatedId=$results[0]["id"];
-             $this->createResponse(array('id' => $UpadtedId,'message'=>'success: updated'),200);
+             $this->createResponse(array('id' => $UpdatedId,'message'=>'success: updated'),200);
         } catch (Exception $e) {
             $this->createResponse("No map with id $id",400);
         }  

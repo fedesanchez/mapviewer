@@ -12,50 +12,43 @@ gxp.plugins.SaveMap = Ext.extend(gxp.plugins.Tool, {
         map: this.map,
         control: new OpenLayers.Control(),
         handler: function (){ 
-                var center=app.mapPanel.map.getCenter();
-                var zoom=app.mapPanel.map.getZoom();
-                app.map.center=[center.lon,center.lat];
-                app.map.zoom=zoom;
-                
-                var portalconfig = "{ 'portalConfig':"+ Ext.util.JSON.encode(app.portalConfig) +"}";
-                var tools='';//Ext.util.JSON.encode(app.tools);
-                var sources="{ 'sources' :"+ Ext.util.JSON.encode(app.sources) + "}";
-                var map="{ 'map' :"+ Ext.util.JSON.encode(app.map) + "}";
+              
                 var description="mi descripcion";
 
+                var configStr = Ext.util.JSON.encode(app.getState());
+                
 
                 var method, url;
-                if (id=="sacar esto") {
+                if (app._id) {
                     method = "PUT";
-                    url = "../maps/" + this.id;
+                    url = "maps.php/" + app._id;
                 } else {
                     method = "POST";
                     url = "maps.php";
                 }
             
+            
                 
                 var requestConfig = {
                     method: method,
                     url: url,
-                    data: OpenLayers.Util.getParameterString({portalconfig: portalconfig,tools:tools,sources:sources,map:map,description:description}),
+                    data: OpenLayers.Util.getParameterString({map:configStr,description:description}),                    
                     headers: {
-                        "Content-Type": "application/x-www-form-urlencoded"
-                    },
-                    callback:function(request){alert("save")}                    
+                              "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                    callback:function(response){
+                              var obj = Ext.util.JSON.decode(response.responseText);
+                              var data=obj[0].data;
+                                if(data.id){
+                                   if(method == "POST")window.location="view.php?id="+ data.id;
+                                   if(method == "PUT")alert("se edito el mapa");
+                                }
+                            }                    
                 };
               
                     OpenLayers.Request.issue(Ext.apply(requestConfig));                          
               
 
-            /*  var request = OpenLayers.Request.POST({
-                  url: "maps.php",
-                  data: OpenLayers.Util.getParameterString({foo: "bar"}),
-                  headers: {
-                      "Content-Type": "application/x-www-form-urlencoded"
-                  },
-                  callback: handleSave
-              });
-          */
 
         },
         handleSave : function (request) {
@@ -72,3 +65,5 @@ gxp.plugins.SaveMap = Ext.extend(gxp.plugins.Tool, {
 });
 
 Ext.preg(gxp.plugins.SaveMap.prototype.ptype, gxp.plugins.SaveMap);
+
+

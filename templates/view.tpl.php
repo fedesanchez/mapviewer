@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html>
     <head>
         <title>Segunda version</title>
@@ -26,43 +25,39 @@
 
         <!-- app resources -->
         <link rel="stylesheet" type="text/css" href="theme/app/style.css">
-        <script type="text/javascript" src="src/override-ext-ajax.js"></script>
+        
+    </head>
+    <body></body>
+    <script type="text/javascript" src="src/override-ext-ajax.js"></script>
         <script type="text/javascript" src="src/lib.js"></script>
+        <script type="text/javascript" src="src/tools.js"></script>
         <script type="text/javascript" src="src/savemap.js"></script>
         
-        <script>
+        <script type="text/javascript">
+          var app;    
+
+          Ext.onReady(function() {
             Ext.BLANK_IMAGE_URL = "theme/app/img/blank.gif";
             OpenLayers.ImgPath = "externals/openlayers/img/";
             GeoExt.Lang.set("es");
             OpenLayers.ProxyHost="proxy/?url=";
-            var app;
+            
             Ext.Ajax.request({
                     url: "<?php echo $map;?>",
                     success: function(response) {                        
                         var obj = Ext.util.JSON.decode(response.responseText);
                         var data=obj[0].data;
-                        var config={};
-                        config.portalConfig=Ext.util.JSON.decode(data[0]).portalConfig;
-                        config.tools=Ext.util.JSON.decode(data[1]).tools;
-                        config.sources=Ext.util.JSON.decode(data[2]).sources;
-                        config.map=Ext.util.JSON.decode(data[3]).map;
-                                                                                                        
+                        var config = Ext.util.JSON.decode(data[0]); 
+                        config.tools=tools;              
+                                                                                         
                         app = new gxp.Viewer(config);
+                        app._id="<?php echo $id;?>";
                     },
                     failure: function(response) {
                         console.log('server-side failure with status code ' + response.status);
                     }
             });
-/*
-            if(AppResponse.status==200){
-                var json=AppResponse.request;
-                json="{"+json+"}";
-                var map=Ext.util.JSON.decode(json);
-                var app = new gxp.Viewer(map);    
-            }
-  */        
+        });        
  
         </script>
-    </head>
-    <body></body>
 </html>
